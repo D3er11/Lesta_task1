@@ -5,6 +5,7 @@ import json
 private_key = None
 
 
+#TODO change cd remote_dir to os.chdir and add git lib and get info from it
 def is_directory_exists(ssh, remote_directory):
     command = f"cd {remote_directory} && [ -d .git ] && echo 'Git' || ([ -d .svn ] && echo 'Svn' || echo 'Not git or svn') "
     stdin, stdout, stderr = ssh.exec_command(command)
@@ -42,13 +43,13 @@ def update_json_data(data, repository_info):
     data["revision"] = repository_info.get("revision")
 
 
-def establish_ssh_connection(hostname, username, password, key_path=None):
+def establish_ssh_connection(hostname, username, password=None, key_path=None):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     try:
         if key_path:
-            ssh.connect(hostname, username=username, password=password, key_filename=key_path)
+            ssh.connect(hostname, username=username, key_filename=key_path)
             print("SSH connection established using SSH key!")
         else:
             ssh.connect(hostname, username=username, password=password)
@@ -95,12 +96,12 @@ def login():
 
         #  Авторизация на ssh host может происходить либо по ssh ключу, либо по password, который равен user,
         # то есть для пользователя user1, пароль user1, если у пользователя нет ключа.
-        if private_key is not None:
-            ssh = establish_ssh_connection(hostname=host, username=user, password=user, key_path=private_key)
+        if private_key:
+            ssh = establish_ssh_connection(hostname=host, username=user, key_path=private_key)
         else:
             ssh = establish_ssh_connection(hostname=host, username=user, password=user)
 
-        if ssh is not None:
+        if ssh:
             # У каждого пользователя user в директории ~/bw/ может быть рабочая копия git или subversion.
             remote_directory = "~/bw"
             repository_info = retrieve_repository_info(ssh, remote_directory)
@@ -114,4 +115,5 @@ def login():
         json.dump(data, f, indent=4)
 
 
-login()
+if __name__ == "__main__":
+    login()
