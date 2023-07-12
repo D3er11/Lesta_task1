@@ -38,11 +38,6 @@ def get_svn_revision(sftp, svn_directory):
     return revision
 
 
-def update_json_data(data, repository_info):
-    data["branch"] = repository_info.get("branch")
-    data["revision"] = repository_info.get("revision")
-
-
 def establish_ssh_connection(hostname, username, password=None, key_path=None):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
